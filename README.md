@@ -3,7 +3,7 @@
 **Programa:** Ingeniería en Sistemas Computacionales / Plan 2020
 **Escuela Superior de Cómputo — Instituto Politécnico Nacional**
 ## Alumnos
-Nombres: Morales Gonzáles Emmanuel - Romero Sayún Jonathan
+Nombres: Morales Gonzáles Emmanuel Boleta: -2025630602 - Romero Sayún Jonathan
 Boleta: - 2025630298
 Grupo: 3CV4
 
