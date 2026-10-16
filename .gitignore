@@ -1,14 +1,41 @@
-﻿# Sistema operativo y editores
+
+# =========================
+# Variables de entorno
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Datos persistentes de PostgreSQL
+# =========================
+postgres_data/
+pgdata/
+data/postgres/
+
+# =========================
+# Respaldos de bases de datos
+# =========================
+backups/
+*.dump
+*.backup
+
+# =========================
+# Logs y archivos temporales
+# =========================
+*.log
+*.tmp
+*.temp
+
+# =========================
+# Archivos del sistema operativo
+# =========================
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# =========================
+# Configuración local de editores
+# =========================
 .vscode/
 .idea/
-
-# Docker y bases de datos locales
-*.log
-pgdata/
-.env
-
-# Archivos temporales
-~$*
-*.tmp
