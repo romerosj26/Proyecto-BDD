@@ -1,0 +1,14 @@
+﻿# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Docker y bases de datos locales
+*.log
+pgdata/
+.env
+
+# Archivos temporales
+~$*
+*.tmp
