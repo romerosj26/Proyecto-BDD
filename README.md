@@ -15,11 +15,11 @@
 
 ---
 
-## 1. Proyecto Propio: Concesionaria de Autos (Renta y Venta)
-* **Descripción:** Sistema de gestión integral para la comercialización de automóviles nuevos y usados, así como el servicio de renta de vehículos por periodos determinados.
-* **Modelo EER:** Ampliado con especialización total y disjunta de vehículos (`VehiculoRenta` y `VehiculoVenta`), entidades débiles por identificación (`Mantenimiento` e `IncidenciaAlquiler`) y cardinalidades mínimas y máximas justificadas por reglas de negocio.
-* **Ubicación:** `proyecto-propio/`
+## 1. Caso de Estudio
 
+**Sistema de gestión de una concesionaria de venta y renta de automóviles**, se dedica a la 
+comercialización de automóviles nuevos y usados, así como a la renta de vehículos por 
+periodos determinados.
 ---
 
 ## 2. Estructura del Repositorio
