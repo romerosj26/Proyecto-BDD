@@ -43,7 +43,3 @@ Practica1/
 └── 
 ```
 ---
-## 5. Declaración sobre el uso de IA Generativa
-En apego a los lineamientos de integridad académica:
-* **Herramienta:** Gemini (Google).
-* **Uso:** Configuración de mapeo de puertos concurrentes en Docker para PostgreSQL (5432 y 5433), estructuración técnica de bitácoras de levantamiento y redacción de propuestas de mejora conforme a los requerimientos de la práctica.
