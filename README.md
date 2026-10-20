@@ -74,4 +74,26 @@ practica2/
 ## 5. Declaración sobre el uso de IA Generativa
 En apego a los lineamientos de integridad académica:
 * **Herramienta:** Gemini (Google).
-* **Uso:** Configuración de mapeo de puertos concurrentes en Docker para PostgreSQL (5432 y 5433), estructuración técnica de bitácoras de levantamiento y redacción de propuestas de mejora conforme a los requerimientos de la práctica.
+* **Uso:** Configuración de mapeo de puertos concurrentes en Docker para PostgreSQL (5432 y 5433), estructuración técnica de bitácoras de levantamiento y redacción de propuestas de mejora conforme a los requerimientos de la práctica.  
+
+
+## Documentación y Entregables del Repositorio
+
+### Práctica 1: Fundamentos y Entorno
+* [Planteamiento General del Proyecto](./docs/planteamiento-general.pdf)
+* [Estudio del Dominio del Problema](./docs/estudio-dominio.pdf)
+* [Especificación de Requisitos del Sistema](./docs/requisitos-sistema.pdf)
+* [Diseño del Entorno y Arquitectura Docker](./docs/arquitectura-entorno.pdf)
+* [Estado del Arte y Análisis Comparativo](./docs/estado-del-arte.pdf)
+
+---
+
+### Práctica 2: Modelo EER y Proyecto Asignado
+* **Proyecto Asignado:** Consumo de Agua en la CDMX (ICOKG 2026)
+* **Repositorio Fork Oficial:** [EMMAUELMG15/Data_Warehouse_static](https://github.com/EMMAUELMG15/Data_Warehouse_static)
+* **Commit ID evaluado:** `b221008f51a2d48074d2847a9ff754e60ea9b4a4`
+* [Bitácora de Levantamiento Técnico](./proyecto-asignado/levantamiento.md)
+* **Evidencias de Ejecución:**
+  * [Despliegue del contenedor en Docker](./evidencias/proyecto-asignado/arranque_docker.png)
+  * [Aplicación web local interactiva](./evidencias/proyecto-asignado/app_local.png)
+  * [Consulta directa en PostgreSQL](./evidencias/proyecto-asignado/consulta_db.png)* 
