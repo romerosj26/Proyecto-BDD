@@ -37,9 +37,9 @@
 | Emmanuel Morales González | Incorporación de módulo de reportes ciudadanos y detección geoespacial de fugas | [#2](https://github.com/romerosj26/Proyecto-BDD/issues/2) |
 | Emmanuel Morales González | Estratificación de consumo por tipo de tarifa y régimen de tenencia | [#3](https://github.com/romerosj26/Proyecto-BDD/issues/3) |
 | Emmanuel Morales González | Monitoreo de tandeo y disponibilidad por fuente de abastecimiento | [#4](https://github.com/romerosj26/Proyecto-BDD/issues/4) |
-| Jonathan Romero Sayún | *[Propuesta 1 del compañero]* | [#5](https://github.com/romerosj26/Proyecto-BDD/issues/5) |
-| Jonathan Romero Sayún | *[Propuesta 2 del compañero]* | [#6](https://github.com/romerosj26/Proyecto-BDD/issues/6) |
-| Jonathan Romero Sayún | *[Propuesta 3 del compañero]* | [#7](https://github.com/romerosj26/Proyecto-BDD/issues/7) |
+| Jonathan Romero Sayún | Registro y revisión de zonas atípicas | [#5](https://github.com/romerosj26/Proyecto-BDD/issues/5) |
+| Jonathan Romero Sayún | Consumo per cápita con datos censales | [#6](https://github.com/romerosj26/Proyecto-BDD/issues/6) |
+| Jonathan Romero Sayún | Límites oficiales y colindancia exacta | [#7](https://github.com/romerosj26/Proyecto-BDD/issues/7) |
 
 *(Nota: actualiza los números `#` de los enlaces si tus issues en GitHub tienen otro ID)*.
 
