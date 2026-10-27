@@ -77,23 +77,31 @@ En apego a los lineamientos de integridad académica:
 * **Uso:** Configuración de mapeo de puertos concurrentes en Docker para PostgreSQL (5432 y 5433), estructuración técnica de bitácoras de levantamiento y redacción de propuestas de mejora conforme a los requerimientos de la práctica.  
 
 
-## Documentación y Entregables del Repositorio
+### Documentación y Entregables del Repositorio
 
-### Práctica 1: Fundamentos y Entorno
-* [Planteamiento General del Proyecto](./docs/planteamiento-general.pdf)
-* [Estudio del Dominio del Problema](./docs/estudio-dominio.pdf)
-* [Especificación de Requisitos del Sistema](./docs/requisitos-sistema.pdf)
-* [Diseño del Entorno y Arquitectura Docker](./docs/arquitectura-entorno.pdf)
-* [Estado del Arte y Análisis Comparativo](./docs/estado-del-arte.pdf)
+### Práctica 1: Fundamentos teóricos y entorno
+* [Ejercicio 1: Control de Versiones con Git y GitHub](./docs/control-versiones-git.pdf)
+* [Ejercicio 2: Arquitectura de Contenedores con Docker](./docs/entorno-docker.pdf)
+* [Ejercicio 3: Fundamentos e Investigación sobre SGBD](./docs/investigacion-sgbd.pdf)
+* [Ejercicio 4: Estado del Arte de Artículos Científicos](./docs/estado-del-arte.pdf)
 
 ---
 
-### Práctica 2: Modelo EER y Proyecto Asignado
-* **Proyecto Asignado:** Consumo de Agua en la CDMX (ICOKG 2026)
-* **Repositorio Fork Oficial:** [EMMAUELMG15/Data_Warehouse_static](https://github.com/EMMAUELMG15/Data_Warehouse_static)
+### Proyecto Propio: Concesionaria de Autos (Renta y Venta)
+* [Caso de Estudio y Entrevista de Dominio](./proyecto-propio/caso-estudio-concesionaria.pdf)
+* [Requisitos Ampliados y Modelo Conceptual EER](./proyecto-propio/requisitos-ampliados.pdf)
+* [Diagrama EER (Notación Peter Chen)](./proyecto-propio/eer-chen.png)
+* [Diagrama EER (Notación Crow's Feet)](./proyecto-propio/eer-crows-feet.png)
+
+---
+
+### Proyecto Asignado: Consumo de Agua CDMX (ICOKG 2026)
+* **Repositorio Fork:** [https://github.com/EMMAUELMG15/Data_Warehouse_static](https://github.com/EMMAUELMG15/Data_Warehouse_static)
 * **Commit ID evaluado:** `b221008f51a2d48074d2847a9ff754e60ea9b4a4`
-* [Bitácora de Levantamiento Técnico](./proyecto-asignado/levantamiento.md)
-* **Evidencias de Ejecución:**
+* [Bitácora Técnica de Puesta en Marcha](./proyecto-asignado/levantamiento.md)
+* [Modelo Conceptual del Dominio (EER)](./proyecto-asignado/eer.png)
+* [Correspondencia Conceptual vs. Esquema Dimensional](./proyecto-asignado/correspondencia-con-el-esquema.pdf)
+* **Evidencias Gráficas de Funcionamiento:**
   * [Despliegue del contenedor en Docker](./evidencias/proyecto-asignado/arranque_docker.png)
   * [Aplicación web local interactiva](./evidencias/proyecto-asignado/app_local.png)
-  * [Consulta directa en PostgreSQL](./evidencias/proyecto-asignado/consulta_db.png)* 
+  * [Consulta directa en PostgreSQL](./evidencias/proyecto-asignado/consulta_db.png)
