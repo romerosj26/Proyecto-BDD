@@ -37,38 +37,31 @@
 | Emmanuel Morales González | Incorporación de módulo de reportes ciudadanos y detección geoespacial de fugas | [#2](https://github.com/romerosj26/Proyecto-BDD/issues/2) |
 | Emmanuel Morales González | Estratificación de consumo por tipo de tarifa y régimen de tenencia | [#3](https://github.com/romerosj26/Proyecto-BDD/issues/3) |
 | Emmanuel Morales González | Monitoreo de tandeo y disponibilidad por fuente de abastecimiento | [#4](https://github.com/romerosj26/Proyecto-BDD/issues/4) |
-| Jonathan Romero Sayún | *[Propuesta 1 del compañero]* | [#5](https://github.com/romerosj26/Proyecto-BDD/issues/5) |
-| Jonathan Romero Sayún | *[Propuesta 2 del compañero]* | [#6](https://github.com/romerosj26/Proyecto-BDD/issues/6) |
-| Jonathan Romero Sayún | *[Propuesta 3 del compañero]* | [#7](https://github.com/romerosj26/Proyecto-BDD/issues/7) |
+| Jonathan Romero Sayún | Registro y revisión de zonas atípicas | [#5](https://github.com/romerosj26/Proyecto-BDD/issues/9) |
+| Jonathan Romero Sayún | Consumo per cápita con datos censales | [#6](https://github.com/romerosj26/Proyecto-BDD/issues/10) |
+| Jonathan Romero Sayún | Límites oficiales y colindancia exacta | [#7](https://github.com/romerosj26/Proyecto-BDD/issues/11) |
 
-*(Nota: actualiza los números `#` de los enlaces si tus issues en GitHub tienen otro ID)*.
 
 ---
 
 ## 4. Estructura del Repositorio
 ```text
-practica2/
+practica3/
 ├── README.md
-├── entorno/
-│   └── compose.yaml
 ├── proyecto-propio/
-│   ├── requisitos-ampliados.pdf
-│   ├── eer-chen.png
-│   └── eer-crows-feet.png
+│   ├── inventario-eer.pdf
+│   ├── transformacion.pdf
+│   ├── diagrama-relacional.png
+│   └── sql/
+│       ├── esquema.sql
+│       └── pruebas-de-restricciones.sql
 ├── proyecto-asignado/
-│   ├── levantamiento.md
-│   ├── eer.png
-│   └── correspondencia-con-el-esquema.pdf
-├── articulos/
-│   └── resumenes.pdf
-├── propuestas/
-│   └── propuestas-de-mejora.pdf
-├── evidencias/
-│   ├── git/
-│   ├── docker/
-│   └── proyecto-asignado/
-└── exposicion/
-      └── presentacion.pdf
+│   ├── analisis-del-esquema.pdf
+│   └── comparacion-eer-relacional.pdf
+├── cambios/
+│   ├── cambio-usuario.sql
+│   └── cambio-usuario.pdf
+└── evidencias
 ```
 ---
 ## 5. Declaración sobre el uso de IA Generativa
@@ -105,3 +98,29 @@ En apego a los lineamientos de integridad académica:
   * [Despliegue del contenedor en Docker](./evidencias/proyecto-asignado/arranque_docker.png)
   * [Aplicación web local interactiva](./evidencias/proyecto-asignado/app_local.png)
   * [Consulta directa en PostgreSQL](./evidencias/proyecto-asignado/consulta_db.png)
+
+
+  --
+  ###Ejercicio 2. Inventario del modelo EER del proyecto propio
+  
+  ## Contenido
+
+| Archivo | Descripción |
+|---|---|
+| `Ejercicio2_Inventario_EER.docx` | Inventario del modelo EER: entidades fuertes y débiles, relaciones, jerarquías, atributos multivaluados, compuestos y derivados, relaciones ternarias, y las tres preguntas previas a la transformación. |
+| `README.md` | Cambios hechos al modelo EER antes de transformarlo. |
+
+## Cambios al modelo EER antes de la transformación
+
+Al comparar el diagrama de Chen con el de Crow's Feet se encontraron diferencias de nombre y de cardinalidad entre ambos. Se corrigieron en el diagrama de Chen para que los dos representen exactamente el mismo modelo. El inventario usa los nombres corregidos.
+
+| # | Cambio | Por qué |
+|---|---|---|
+| 1 | La entidad débil `Entity` se renombró como `DetalleVenta`. | `Entity` es la etiqueta que draw.io asigna por defecto. En el resto del modelo, los requisitos y las consultas la entidad se llama `DetalleVenta`. |
+| 2 | En `Cliente – realiza – Venta`, `Cliente – solicita – Renta` y `VehiculoRenta – se renta en – Renta`, la cardinalidad `N` pasó a `(0,N)`. | El modelo usa el formato (mín,máx) en todas las relaciones. Con solo `N` no se sabe si la participación es opcional u obligatoria, y la mínima decide qué claves foráneas serán `NOT NULL`. |
+| 3 | En `Renta – tiene – InspeccionRenta` se agregó `(0,2)` del lado de `Renta`. | Faltaba en el diagrama de Chen. El diagrama de Crow's Feet y el Ejercicio 4 lo declaran: una renta tiene como máximo dos inspecciones (entrega y devolución). |
+| 4 | `nivelGasolina` se renombró como `nivelCombustible`. | Es el nombre que usan el diagrama de Crow's Feet y las consultas del Ejercicio 4. |
+| 5 | `año` se renombró como `anio`. | Es el nombre que usa el diagrama de Crow's Feet, y evita la `ñ` en los nombres de columnas SQL. |
+| 6 | `vehiculoVenta`, `vehiculoRenta` e `inspeccionRenta` se renombraron como `VehiculoVenta`, `VehiculoRenta` e `InspeccionRenta`. | Son los nombres de las tablas del diagrama de Crow's Feet. |
+
+La estructura del modelo no cambió: son las mismas entidades, relaciones, la misma jerarquía de `Vehiculo` (solapada y total) y los mismos atributos compuestos y multivaluado.
