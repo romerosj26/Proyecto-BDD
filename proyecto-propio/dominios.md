@@ -184,3 +184,98 @@ Por ejemplo, un dominio de teléfono puede necesitar una expresión de validaci�
 La selección de tipos de datos busca representar correctamente la información de la concesionaria, evitando conversiones innecesarias, pérdida de precisión y almacenamiento de valores que no corresponden a la naturaleza de cada atributo.
 
 La incorporación de dominios permite complementar los tipos de datos existentes mediante reglas reutilizables, fortaleciendo la integridad y consistencia de la base de datos.
+
+# Restricciones de columna y reglas de integridad
+
+## 1. Introducción
+
+La base de datos de la concesionaria implementa restricciones para garantizar la integridad, consistencia y validez de la información almacenada.
+
+Estas restricciones permiten evitar registros incompletos, valores fuera de los rangos permitidos, duplicidad de información y relaciones entre registros inexistentes.
+
+## 2. Restricciones NOT NULL
+
+Se utiliza `NOT NULL` en los atributos que son indispensables para el funcionamiento del sistema.
+
+Ejemplos:
+- `cliente.nombre`: el cliente debe tener nombre.
+- `cliente.correo`: es necesario para identificar y contactar al cliente.
+- `empleado.numeroEmpleado`: cada empleado debe tener un número asignado.
+- `vehiculo.VIN`: todo vehículo debe contar con un identificador vehicular.
+- `venta.idCliente`: toda venta debe estar asociada a un cliente.
+- `renta.idVehiculo`: toda renta debe identificar el vehículo correspondiente.
+
+Los atributos opcionales, como `apellidoMaterno`, `fechaHoraDevReal` y `observaciones`, permiten valores NULL.
+
+## 3. Restricciones DEFAULT
+
+Se utilizan valores predeterminados cuando existe un valor inicial natural para el atributo.
+
+| Tabla | Columna | Valor predeterminado | Justificación |
+|---|---|---|---|
+| vehiculo | kilometraje | 0 | Un vehículo nuevo puede comenzar con cero kilómetros. |
+| vehiculo | estadoInventario | 'Disponible' | Un vehículo registrado se considera disponible inicialmente. |
+| venta | fecha | CURRENT_DATE | Registra la fecha actual si no se proporciona otra. |
+| renta | estado | 'Reservada' | Una renta comienza en estado de reserva. |
+
+## 4. Restricciones UNIQUE
+
+| Tabla | Columnas | Regla de negocio |
+|---|---|---|
+| cliente | correo | Un correo no puede pertenecer a dos clientes. |
+| empleado | correo | Cada empleado debe tener un correo único. |
+| empleado | numeroEmpleado | El número de empleado no se puede repetir. |
+| vehiculo | VIN | Cada vehículo tiene un VIN único. |
+| detalleVenta | idVehiculo | Un vehículo no puede aparecer en más de un detalle de venta. |
+| inspeccionRenta | idRenta, tipo | Una renta solo puede tener una inspección de cada tipo. |
+
+También existen claves primarias simples y compuestas que garantizan la identificación única de los registros.
+
+## 5. Restricciones CHECK
+
+| Tabla | Restricción | Regla aplicada |
+|---|---|---|
+| cliente | ck_cliente_cp | El código postal debe contener cinco dígitos. |
+| vehiculo | ck_vehiculo_anio | El año debe estar entre 1980 y 2100. |
+| vehiculo | ck_vehiculo_km | El kilometraje no puede ser negativo. |
+| vehiculo | ck_vehiculo_estado | El estado debe ser Disponible, Vendido o Fuera de servicio. |
+| vehiculoVenta | ck_vehiculoventa_precio | El precio de venta debe ser mayor que cero. |
+| vehiculoVenta | ck_vehiculoventa_condicion | La condición debe ser Nuevo o Usado. |
+| vehiculoRenta | ck_vehiculorenta_tarifa | La tarifa diaria debe ser mayor que cero. |
+| venta | ck_venta_importe | El importe total no puede ser negativo. |
+| detalleVenta | ck_detalleventa_linea | El número de línea debe ser mayor que cero. |
+| detalleVenta | ck_detalleventa_precio | El precio aplicado no puede ser negativo. |
+| renta | ck_renta_periodo | La devolución prevista debe ser posterior al inicio. |
+| renta | ck_renta_devreal | La devolución real no puede ser anterior al inicio. |
+| renta | ck_renta_tarifa | La tarifa aplicada debe ser mayor que cero. |
+| renta | ck_renta_importe | El importe total no puede ser negativo. |
+| renta | ck_renta_estado | El estado debe pertenecer a los valores permitidos. |
+| inspeccionRenta | ck_inspeccionrenta_comb | El nivel de combustible debe estar entre 0 y 100. |
+| inspeccionRenta | ck_inspeccionrenta_km | El kilometraje no puede ser negativo. |
+| inspeccionRenta | ck_inspeccionrenta_tipo | El tipo debe ser Entrega o Devolución. |
+
+## 6. Restricciones FOREIGN KEY
+
+Las claves foráneas mantienen la integridad referencial entre las entidades.
+
+Se utilizan, entre otras, las siguientes relaciones:
+
+- Venta referencia al cliente y al empleado que la realizaron.
+- DetalleVenta referencia a una venta y a un vehículo destinado a la venta.
+- Renta referencia al cliente, empleado y vehículo rentado.
+- InspeccionRenta referencia a la renta correspondiente.
+- TelefonoCliente referencia al cliente propietario del teléfono.
+
+Las acciones `ON DELETE RESTRICT` evitan eliminar registros que todavía tienen operaciones relacionadas. `ON DELETE CASCADE` se utiliza cuando los registros dependientes no deben permanecer sin su entidad principal.
+
+## 7. Restricción de exclusión
+
+La tabla `renta` utiliza la restricción `ex_renta_sin_traslape`.
+
+Esta restricción impide que un mismo vehículo tenga dos rentas con periodos superpuestos cuando ambas se encuentran en estado Reservada o Activa.
+
+De esta manera se evita asignar simultáneamente el mismo vehículo a diferentes clientes.
+
+## 8. Conclusión
+
+Las restricciones implementadas protegen la integridad de los datos de la concesionaria y representan reglas reales del negocio. Se utilizan restricciones de nulidad, valores predeterminados, unicidad, validaciones de dominio, claves primarias, claves foráneas y exclusión de periodos.

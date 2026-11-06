@@ -46,22 +46,25 @@
 
 ## 4. Estructura del Repositorio
 ```text
-practica3/
+practica4/
+├── dominios.md
+├── fuente.md
+├── pruebas-dominio.md
+├── permisos.md
+├── datos/
+├── poblar/
+│   └── poblar.sh
+└── proyecto-asignado/
+practica5/
+├── referencias.md
+├── pruebas-referenciales.md
+├── edicion-de-valores.md
+├── integridad-almacen.md
+├── integrantes/
+└── sql/
 ├── README.md
-├── proyecto-propio/
-│   ├── inventario-eer.pdf
-│   ├── transformacion.pdf
-│   ├── diagrama-relacional.png
-│   └── sql/
-│       ├── esquema.sql
-│       └── pruebas-de-restricciones.sql
-├── proyecto-asignado/
-│   ├── analisis-del-esquema.pdf
-│   └── comparacion-eer-relacional.pdf
-├── cambios/
-│   ├── cambio-usuario.sql
-│   └── cambio-usuario.pdf
-└── evidencias
+└── evidencias/
+
 ```
 ---
 ## 5. Declaración sobre el uso de IA Generativa
@@ -100,10 +103,10 @@ En apego a los lineamientos de integridad académica:
   * [Consulta directa en PostgreSQL](./evidencias/proyecto-asignado/consulta_db.png)
 
 
-  --
-  ###Ejercicio 2. Inventario del modelo EER del proyecto propio
+---
+##Ejercicio 2. Inventario del modelo EER del proyecto propio
   
-  ## Contenido
+## Contenido
 
 | Archivo | Descripción |
 |---|---|
@@ -124,3 +127,136 @@ Al comparar el diagrama de Chen con el de Crow's Feet se encontraron diferencias
 | 6 | `vehiculoVenta`, `vehiculoRenta` e `inspeccionRenta` se renombraron como `VehiculoVenta`, `VehiculoRenta` e `InspeccionRenta`. | Son los nombres de las tablas del diagrama de Crow's Feet. |
 
 La estructura del modelo no cambió: son las mismas entidades, relaciones, la misma jerarquía de `Vehiculo` (solapada y total) y los mismos atributos compuestos y multivaluado.
+
+# Práctica 4 — Implementación de bases de datos y permisos
+
+## 1.4. Script de carga de datos
+
+### Descripción
+
+Se desarrolló un script en Python para importar información de un catálogo de vehículos nuevos en México hacia la tabla `catalogoversion` de la base de datos `ProyectoBDD`.
+
+El archivo de origen es:
+
+`datos/precios-autos-nuevos-mexico.csv`
+
+El conjunto contiene 1,127 registros y 14 columnas.
+
+### Requisitos
+
+- PostgreSQL 16.
+- Python 3.11 o superior.
+- Biblioteca `psycopg` para la conexión con PostgreSQL.
+
+Instalación de la dependencia:
+
+```powershell
+python -m pip install "psycopg[binary]"
+```
+
+### Configuración de conexión
+
+El script utiliza variables de entorno para evitar almacenar credenciales directamente en el código.
+
+Configurar las siguientes variables en PowerShell:
+
+```powershell
+$env:DB_HOST = "localhost"
+$env:DB_PORT = "5432"
+$env:DB_NAME = "ProyectoBDD"
+$env:DB_USER = "app_carga"
+$env:DB_PASSWORD = Read-Host "Contraseña de app_carga"
+```
+
+El usuario `app_carga` tiene permisos de conexión, lectura e inserción sobre la tabla `catalogoversion`, así como permiso de uso sobre su secuencia. No tiene permisos de actualización, eliminación ni administración de la base de datos.
+
+### Ejecución
+
+Desde el directorio raíz de la práctica, ejecutar:
+
+```powershell
+python .\scripts\cargar_catalogo.py
+```
+
+### Funcionamiento del script
+
+El proceso realiza las siguientes operaciones:
+
+1. Lee el archivo CSV de origen.
+2. Comprueba que estén presentes las 14 columnas esperadas.
+3. Valida los registros y convierte los datos a sus tipos correspondientes.
+4. Identifica registros inválidos y los almacena en `datos/rechazados/rechazos_catalogo.csv`, indicando la fila y el motivo del rechazo.
+5. Establece conexión con PostgreSQL utilizando el usuario `app_carga`.
+6. Crea una tabla temporal para preparar la información.
+7. Utiliza `COPY` para cargar los registros de forma masiva en la tabla temporal.
+8. Inserta en `catalogoversion` únicamente los registros que todavía no existen.
+9. Confirma la transacción y muestra los resultados de la operación.
+
+La carga se ejecuta dentro de una transacción: si ocurre un error durante el proceso, los cambios de esa operación se revierten.
+
+### Prevención de duplicados
+
+Se utiliza una combinación de los campos `marca`, `modelo`, `version` y `anio` para identificar registros existentes.
+
+La comparación considera los valores nulos del año y no distingue entre mayúsculas y minúsculas en los campos de identificación.
+
+Esto permite ejecutar el script varias veces sin insertar nuevamente los registros que ya fueron cargados.
+
+### Resultados de ejecución
+
+**Primera ejecución, antes de corregir la longitud del campo motor:**
+
+| Indicador | Resultado |
+|---|---:|
+| Registros válidos | 1,120 |
+| Registros insertados | 1,120 |
+| Registros rechazados | 7 |
+
+Durante esta ejecución se detectó que siete descripciones de motor superaban el límite de 100 caracteres. Se corrigió la definición de la columna `motor` para utilizar el tipo `TEXT` y se eliminó el límite artificial de longitud en la validación del script.
+
+**Ejecución posterior a la corrección:**
+
+| Indicador | Resultado |
+|---|---:|
+| Registros válidos | 1,127 |
+| Registros insertados | 7 |
+| Registros ya existentes | 1,120 |
+| Registros rechazados | 0 |
+| Tiempo de ejecución | 0.121 segundos |
+
+**Segunda ejecución posterior a la corrección:**
+
+| Indicador | Resultado |
+|---|---:|
+| Registros válidos | 1,127 |
+| Registros insertados | 0 |
+| Registros ya existentes | 1,127 |
+| Registros rechazados | 0 |
+| Tiempo de ejecución | 0.128 segundos |
+
+Se verificó directamente en PostgreSQL el total de registros:
+
+```sql
+SELECT COUNT(*) FROM catalogoversion;
+```
+
+Resultado esperado:
+
+```text
+1127
+```
+
+### Evidencias
+
+Las salidas de ejecución se almacenan en el directorio `evidencias/`.
+
+- `carga-segunda-ejecucion.txt`: salida de la segunda ejecución posterior a la corrección.
+- `carga-correccion.txt`: salida de la ejecución posterior a la corrección, si se captura.
+
+Los registros rechazados se almacenan en:
+
+`datos/rechazados/rechazos_catalogo.csv`
+
+### Conclusión
+
+El script permite realizar una carga masiva, validar la información de origen, registrar los errores y evitar duplicados. Las pruebas confirmaron la inserción de los 1,127 registros y la repetibilidad del proceso sin generar duplicados.
