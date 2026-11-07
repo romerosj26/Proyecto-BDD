@@ -1,0 +1,195 @@
+== Base copia: data_warehouse_copia (copia de data_warehouse) ==
+         base         | hechos | ubicaciones 
+----------------------+--------+-------------
+ data_warehouse_copia |  70886 |        1553
+(1 row)
+
+
+== psql -f cambio-romerosj26.sql ==
+BEGIN;
+BEGIN
+CREATE TABLE dim_manzana (
+    id_manzana            SERIAL PRIMARY KEY,
+    clave_geoestadistica  VARCHAR(16) UNIQUE,
+    id_ubicacion          INT NOT NULL REFERENCES dim_ubicacion (id_ubicacion),
+    latitud               NUMERIC(9,6) NOT NULL,
+    longitud              NUMERIC(9,6) NOT NULL,
+    CONSTRAINT uq_manzana_coordenada UNIQUE (latitud, longitud),
+    CONSTRAINT ck_manzana_clave CHECK (clave_geoestadistica ~ '^09[0-9A-Z]{14}$'),
+    CONSTRAINT ck_manzana_cdmx CHECK (latitud BETWEEN 19.04 AND 19.60 AND longitud BETWEEN -99.36 AND -98.94)
+);
+CREATE TABLE
+CREATE INDEX idx_manzana_ubicacion ON dim_manzana (id_ubicacion);
+CREATE INDEX
+CREATE TABLE dato_censal (
+    id_manzana           INT NOT NULL REFERENCES dim_manzana (id_manzana) ON DELETE CASCADE,
+    anio_censo           SMALLINT NOT NULL CHECK (anio_censo >= 2010),
+    poblacion_total      INT NOT NULL CHECK (poblacion_total >= 0),
+    viviendas_habitadas  INT NOT NULL CHECK (viviendas_habitadas >= 0),
+    PRIMARY KEY (id_manzana, anio_censo),
+    CONSTRAINT ck_viviendas_poblacion CHECK (viviendas_habitadas <= poblacion_total)
+);
+CREATE TABLE
+ALTER TABLE fact_consumo_agua
+    ADD COLUMN id_manzana INT REFERENCES dim_manzana (id_manzana);
+ALTER TABLE
+CREATE INDEX idx_fact_consumo_manzana ON fact_consumo_agua (id_manzana);
+CREATE INDEX
+CREATE VIEW v_lectura_per_capita AS
+SELECT f.id_fact,
+       f.id_manzana,
+       t.anio,
+       t.bimestre,
+       d.dias_bimestre,
+       c.anio_censo,
+       c.poblacion_total,
+       f.consumo_total,
+       ROUND(f.consumo_total * 1000 / NULLIF(c.poblacion_total * d.dias_bimestre, 0), 2) AS litros_hab_dia
+FROM fact_consumo_agua f
+JOIN dim_tiempo t ON t.id_tiempo = f.id_tiempo
+JOIN (SELECT anio, bimestre, COUNT(*) AS dias_bimestre FROM dim_tiempo GROUP BY anio, bimestre) d
+       ON d.anio = t.anio AND d.bimestre = t.bimestre
+JOIN dato_censal c ON c.id_manzana = f.id_manzana
+                  AND c.anio_censo = (SELECT c2.anio_censo FROM dato_censal c2
+                                      WHERE c2.id_manzana = f.id_manzana
+                                      ORDER BY ABS(c2.anio_censo - t.anio), c2.anio_censo DESC LIMIT 1);
+CREATE VIEW
+CREATE TABLE modelo_ml (
+    id_modelo     SERIAL PRIMARY KEY,
+    nombre        VARCHAR(80) NOT NULL,
+    version       VARCHAR(30) NOT NULL,
+    algoritmo     VARCHAR(80) NOT NULL,
+    parametros    JSONB NOT NULL DEFAULT '{}'::jsonb,
+    entrenado_en  TIMESTAMPTZ NOT NULL,
+    CONSTRAINT uq_modelo_version UNIQUE (nombre, version)
+);
+CREATE TABLE
+CREATE TABLE deteccion_anomalia (
+    id_deteccion      BIGSERIAL PRIMARY KEY,
+    id_fact           INT NOT NULL REFERENCES fact_consumo_agua (id_fact),
+    id_modelo         INT NOT NULL REFERENCES modelo_ml (id_modelo),
+    calculado_en      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    puntaje_anomalia  DOUBLE PRECISION NOT NULL,
+    es_anomalia       BOOLEAN NOT NULL,
+    atributos         JSONB,
+    CONSTRAINT uq_deteccion_hecho_modelo UNIQUE (id_fact, id_modelo)
+);
+CREATE TABLE
+CREATE INDEX idx_deteccion_modelo_puntaje ON deteccion_anomalia (id_modelo, puntaje_anomalia DESC);
+CREATE INDEX
+COMMIT;
+COMMIT
+
+== Tablas resultantes ==
+                                              Table "public.dim_manzana"
+        Column        |         Type          | Collation | Nullable |                     Default                     
+----------------------+-----------------------+-----------+----------+-------------------------------------------------
+ id_manzana           | integer               |           | not null | nextval('dim_manzana_id_manzana_seq'::regclass)
+ clave_geoestadistica | character varying(16) |           |          | 
+ id_ubicacion         | integer               |           | not null | 
+ latitud              | numeric(9,6)          |           | not null | 
+ longitud             | numeric(9,6)          |           | not null | 
+Indexes:
+    "dim_manzana_pkey" PRIMARY KEY, btree (id_manzana)
+    "dim_manzana_clave_geoestadistica_key" UNIQUE CONSTRAINT, btree (clave_geoestadistica)
+    "idx_manzana_ubicacion" btree (id_ubicacion)
+    "uq_manzana_coordenada" UNIQUE CONSTRAINT, btree (latitud, longitud)
+Check constraints:
+    "ck_manzana_cdmx" CHECK (latitud >= 19.04 AND latitud <= 19.60 AND longitud >= '-99.36'::numeric AND longitud <= '-98.94'::numeric)
+    "ck_manzana_clave" CHECK (clave_geoestadistica::text ~ '^09[0-9A-Z]{14}$'::text)
+Foreign-key constraints:
+    "dim_manzana_id_ubicacion_fkey" FOREIGN KEY (id_ubicacion) REFERENCES dim_ubicacion(id_ubicacion)
+Referenced by:
+    TABLE "dato_censal" CONSTRAINT "dato_censal_id_manzana_fkey" FOREIGN KEY (id_manzana) REFERENCES dim_manzana(id_manzana) ON DELETE CASCADE
+    TABLE "fact_consumo_agua" CONSTRAINT "fact_consumo_agua_id_manzana_fkey" FOREIGN KEY (id_manzana) REFERENCES dim_manzana(id_manzana)
+
+                   Table "public.dato_censal"
+       Column        |   Type   | Collation | Nullable | Default 
+---------------------+----------+-----------+----------+---------
+ id_manzana          | integer  |           | not null | 
+ anio_censo          | smallint |           | not null | 
+ poblacion_total     | integer  |           | not null | 
+ viviendas_habitadas | integer  |           | not null | 
+Indexes:
+    "dato_censal_pkey" PRIMARY KEY, btree (id_manzana, anio_censo)
+Check constraints:
+    "ck_viviendas_poblacion" CHECK (viviendas_habitadas <= poblacion_total)
+    "dato_censal_anio_censo_check" CHECK (anio_censo >= 2010)
+    "dato_censal_poblacion_total_check" CHECK (poblacion_total >= 0)
+    "dato_censal_viviendas_habitadas_check" CHECK (viviendas_habitadas >= 0)
+Foreign-key constraints:
+    "dato_censal_id_manzana_fkey" FOREIGN KEY (id_manzana) REFERENCES dim_manzana(id_manzana) ON DELETE CASCADE
+
+                                               Table "public.deteccion_anomalia"
+      Column      |           Type           | Collation | Nullable |                         Default                          
+------------------+--------------------------+-----------+----------+----------------------------------------------------------
+ id_deteccion     | bigint                   |           | not null | nextval('deteccion_anomalia_id_deteccion_seq'::regclass)
+ id_fact          | integer                  |           | not null | 
+ id_modelo        | integer                  |           | not null | 
+ calculado_en     | timestamp with time zone |           | not null | now()
+ puntaje_anomalia | double precision         |           | not null | 
+ es_anomalia      | boolean                  |           | not null | 
+ atributos        | jsonb                    |           |          | 
+Indexes:
+    "deteccion_anomalia_pkey" PRIMARY KEY, btree (id_deteccion)
+    "idx_deteccion_modelo_puntaje" btree (id_modelo, puntaje_anomalia DESC)
+    "uq_deteccion_hecho_modelo" UNIQUE CONSTRAINT, btree (id_fact, id_modelo)
+Foreign-key constraints:
+    "deteccion_anomalia_id_fact_fkey" FOREIGN KEY (id_fact) REFERENCES fact_consumo_agua(id_fact)
+    "deteccion_anomalia_id_modelo_fkey" FOREIGN KEY (id_modelo) REFERENCES modelo_ml(id_modelo)
+
+
+== Datos existentes: carga de manzanas y vínculo con los hechos ==
+BEGIN
+CREATE TABLE
+COPY 71102
+INSERT 0 22858
+UPDATE 66519
+COMMIT
+ manzanas | hechos_con_manzana | hechos_sin_manzana 
+----------+--------------------+--------------------
+    22858 |              66519 |               4367
+(1 row)
+
+INSERT 0 22858
+
+== Modelo de anomalías ==
+detecciones guardadas: 70886 | marcadas como anomalía: 353
+         nombre          | version | detecciones | anomalias 
+-------------------------+---------+-------------+-----------
+ consumo_atipico_iforest | 1.0.0   |       70886 |       353
+(1 row)
+
+
+== Consulta del punto 3 (psql -f consulta.sql) ==
+        alcaldia        | consumo_m3 | habitantes | litros_hab_dia | lugar_por_total | lugar_por_habitante 
+------------------------+------------+------------+----------------+-----------------+---------------------
+ CUAJIMALPA DE MORELOS  |     971438 |      36618 |          434.9 |              12 |                   1
+ MIGUEL HIDALGO         |    4590353 |     215064 |          349.9 |               2 |                   2
+ CUAUHTEMOC             |    5599997 |     289203 |          317.4 |               1 |                   3
+ BENITO JUAREZ          |    4564978 |     270881 |          276.3 |               3 |                   4
+ ALVARO OBREGON         |    3025964 |     186768 |          265.6 |               5 |                   5
+ AZCAPOTZALCO           |    2496659 |     178288 |          229.6 |               7 |                   6
+ IZTACALCO              |    2113890 |     165849 |          208.9 |              10 |                   7
+ TLALPAN                |    1512351 |     126870 |          195.4 |              11 |                   8
+ COYOACAN               |    2316496 |     220091 |          172.5 |               9 |                   9
+ LA MAGDALENA CONTRERAS |     430106 |      41769 |          168.8 |              14 |                  10
+ VENUSTIANO CARRANZA    |    2361157 |     235982 |          164.0 |               8 |                  11
+ GUSTAVO A. MADERO      |    3902283 |     424635 |          150.7 |               4 |                  12
+ IZTAPALAPA             |    2737186 |     438971 |          102.2 |               6 |                  13
+ XOCHIMILCO             |     611547 |     106371 |           94.2 |              13 |                  14
+ TLAHUAC                |     282526 |      87042 |           53.2 |              15 |                  15
+ MILPA ALTA             |      48544 |      26256 |           30.3 |              16 |                  16
+(16 rows)
+
+
+== Anomalías con su consumo por habitante ==
+ id_fact | alcaldia |              colonia              | puntaje | consumo_m3 | litros_hab_dia |             modelo             |         calculado_en          
+---------+----------+-----------------------------------+---------+------------+----------------+--------------------------------+-------------------------------
+   67284 | TLALPAN  | CULTURA MAYA                      |  0.7050 |       0.12 |           0.01 | consumo_atipico_iforest v1.0.0 | 2026-11-06 19:50:11.701147-06
+    5471 | TLALPAN  | PEDREGAL DE SN NICOLAS 1A SECC    |  0.7036 |       0.49 |           0.06 | consumo_atipico_iforest v1.0.0 | 2026-11-06 19:50:11.701147-06
+   29489 | TLALPAN  | PEDREGAL DE SN NICOLAS 1A SECC    |  0.7036 |       0.49 |           0.06 | consumo_atipico_iforest v1.0.0 | 2026-11-06 19:50:11.701147-06
+    9162 | TLALPAN  | PEDREGAL DE SN NICOLAS 3A SECC    |  0.7018 |       0.61 |           0.07 | consumo_atipico_iforest v1.0.0 | 2026-11-06 19:50:11.701147-06
+   68399 | TLALPAN  | AMPLIACION MIGUEL HIDALGO 3A SECC |  0.7018 |       0.61 |           0.06 | consumo_atipico_iforest v1.0.0 | 2026-11-06 19:50:11.701147-06
+(5 rows)
+
